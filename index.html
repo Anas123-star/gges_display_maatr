@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AAQMS Display</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 96px;
+    height: 64px;
+    background: #000000;
+    overflow: hidden;
+  }
+
+  /* everything is sized in px on purpose — this is meant to be shown
+     1:1 on a 96 x 64 pixel LED matrix / DMD panel */
+  .screen {
+    width: 96px;
+    height: 64px;
+    background: #000;
+    font-family: 'Consolas', 'DejaVu Sans Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .title-bar {
+    height: 9px;
+    width: 96px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .title-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    color: #ff1a1a;
+    font-size: 7px;
+    line-height: 9px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 2px #ff1a1a;
+    animation: scroll-title 9s linear infinite;
+  }
+
+  @keyframes scroll-title {
+    0%   { transform: translateX(96px); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .datetime {
+    height: 8px;
+    line-height: 8px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2px;
+    box-sizing: border-box;
+    color: #29b6f6;
+    font-size: 6px;
+    letter-spacing: 0px;
+    text-shadow: 0 0 2px #29b6f6;
+  }
+
+  .datetime span {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .rows {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    padding: 0 2px;
+    box-sizing: border-box;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: baseline;
+    height: 9px;
+    line-height: 9px;
+  }
+
+  .label {
+    color: #33ff33;
+    font-size: 7px;
+    font-weight: bold;
+    text-shadow: 0 0 2px #33ff33;
+    text-align: left;
+  }
+
+  .value {
+    color: #29b6f6;
+    font-size: 8px;
+    font-weight: bold;
+    text-shadow: 0 0 2px #29b6f6;
+    text-align: center;
+  }
+
+  .unit {
+    color: #29b6f6;
+    font-size: 5px;
+    text-align: right;
+  }
+
+</style>
+</head>
+<body>
+  <div class="screen" id="screen">
+    <div class="title-bar">
+      <div class="title-track" id="title">MAATR BIZBAY&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;MAATR ICON&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</div>
+    </div>
+    <div class="datetime">
+      <span id="date">--/--/----</span>
+      <span id="time">--:--</span>
+    </div>
+    <div class="rows" id="rows">
+      <div class="row"><span class="label">PM2.5</span><span class="value" id="pm25">--</span><span class="unit">ug/m3</span></div>
+      <div class="row"><span class="label">PM10</span><span class="value" id="pm10">--</span><span class="unit">ug/m3</span></div>
+      <div class="row"><span class="label">AQI</span><span class="value" id="aqi">--</span><span class="unit"></span></div>
+      <div class="row"><span class="label">TEMP</span><span class="value" id="temp">--</span><span class="unit">C</span></div>
+      <div class="row"><span class="label">HUM</span><span class="value" id="hum">--</span><span class="unit">%</span></div>
+    </div>
+  </div>
+
+  <script>
+    // ---- CONFIGURE THIS ---------------------------------------------------
+    // No API, no fetching — every value is a random number picked from the
+    // ranges below, refreshed once a minute.
+    const REFRESH_MS = 60000; // 1 minute
+
+    const RANGES = {
+      pm25: { min: 25, max: 30, decimals: 0 },
+      pm10: { min: 30, max: 35, decimals: 0 },
+      aqi:  { min: 45, max: 50, decimals: 0 },
+      temp: { min: 27, max: 29, decimals: 1 },
+      hum:  { min: 55, max: 60, decimals: 1 }
+    };
+    // -------------------------------------------------------------------------
+
+    const el = {
+      date: document.getElementById('date'),
+      time: document.getElementById('time'),
+      pm25: document.getElementById('pm25'),
+      pm10: document.getElementById('pm10'),
+      aqi:  document.getElementById('aqi'),
+      temp: document.getElementById('temp'),
+      hum:  document.getElementById('hum')
+    };
+
+    function randomInRange(min, max, decimals) {
+      const val = Math.random() * (max - min) + min;
+      return val.toFixed(decimals);
+    }
+
+    function updateDateTime() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      let hh = d.getHours();
+      const mi = String(d.getMinutes()).padStart(2, "0");
+      const ampm = hh >= 12 ? "PM" : "AM";
+      hh = hh % 12 || 12;
+      el.date.textContent = `${dd}/${mm}/${yyyy}`;
+      el.time.textContent = `${String(hh).padStart(2, "0")}:${mi}${ampm}`;
+    }
+
+    function updateReadings() {
+      el.pm25.textContent = randomInRange(RANGES.pm25.min, RANGES.pm25.max, RANGES.pm25.decimals);
+      el.pm10.textContent = randomInRange(RANGES.pm10.min, RANGES.pm10.max, RANGES.pm10.decimals);
+      el.aqi.textContent  = randomInRange(RANGES.aqi.min,  RANGES.aqi.max,  RANGES.aqi.decimals);
+      el.temp.textContent = randomInRange(RANGES.temp.min, RANGES.temp.max, RANGES.temp.decimals);
+      el.hum.textContent  = randomInRange(RANGES.hum.min,  RANGES.hum.max,  RANGES.hum.decimals);
+    }
+
+    updateReadings();
+    setInterval(updateReadings, REFRESH_MS);
+
+    updateDateTime();
+    setInterval(updateDateTime, 1000); // clock ticks every second, values every minute
+  </script>
+</body>
+</html>
