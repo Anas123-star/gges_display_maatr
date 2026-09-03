@@ -122,7 +122,6 @@
     <div class="rows" id="rows">
       <div class="row"><span class="label">PM2.5</span><span class="value" id="pm25">--</span><span class="unit">ug/m3</span></div>
       <div class="row"><span class="label">PM10</span><span class="value" id="pm10">--</span><span class="unit">ug/m3</span></div>
-      <div class="row"><span class="label">AQI</span><span class="value" id="aqi">--</span><span class="unit"></span></div>
       <div class="row"><span class="label">TEMP</span><span class="value" id="temp">--</span><span class="unit">C</span></div>
       <div class="row"><span class="label">HUM</span><span class="value" id="hum">--</span><span class="unit">%</span></div>
     </div>
@@ -137,7 +136,6 @@
     const RANGES = {
       pm25: { min: 25, max: 30, decimals: 0 },
       pm10: { min: 30, max: 35, decimals: 0 },
-      aqi:  { min: 45, max: 50, decimals: 0 },
       temp: { min: 27, max: 29, decimals: 1 },
       hum:  { min: 55, max: 60, decimals: 1 }
     };
@@ -148,7 +146,6 @@
       time: document.getElementById('time'),
       pm25: document.getElementById('pm25'),
       pm10: document.getElementById('pm10'),
-      aqi:  document.getElementById('aqi'),
       temp: document.getElementById('temp'),
       hum:  document.getElementById('hum')
     };
@@ -174,7 +171,6 @@
     function updateReadings() {
       el.pm25.textContent = randomInRange(RANGES.pm25.min, RANGES.pm25.max, RANGES.pm25.decimals);
       el.pm10.textContent = randomInRange(RANGES.pm10.min, RANGES.pm10.max, RANGES.pm10.decimals);
-      el.aqi.textContent  = randomInRange(RANGES.aqi.min,  RANGES.aqi.max,  RANGES.aqi.decimals);
       el.temp.textContent = randomInRange(RANGES.temp.min, RANGES.temp.max, RANGES.temp.decimals);
       el.hum.textContent  = randomInRange(RANGES.hum.min,  RANGES.hum.max,  RANGES.hum.decimals);
     }
